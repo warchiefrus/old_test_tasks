@@ -1,0 +1,148 @@
+<html lang=ru>
+  <head>
+		<meta charset=utf-8>
+		<meta http-equiv=X-UA-Compatible content="IE=edge">
+		<meta name=viewport content="width=device-width,initial-scale=1">
+		<title>Тестовое задание СТАК</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style>
+			.mainLayout {
+				font-family: "Avenir", Helvetica, Arial, sans-serif;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+				color: #676d74;
+				font-size: 1rem;
+			}
+		
+			.searchRowLayout {
+				display: grid;
+				grid-template-columns: 70px 1fr;
+			}
+		
+			.searchRowItem {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+		
+			.appLayout {
+				margin: auto;
+				border: 1px solid rgb(110, 110, 110);
+				width: 500px;
+				height: 600px;
+				padding: 10px;
+				display: grid;
+				grid-auto-rows: 40px 1fr;
+			}
+		
+			.commitsLayout {
+				overflow-y: scroll;
+				width: 100%;
+				margin-top: 10px;
+			}
+		
+			.commit {
+				margin-bottom: 5px;
+				background-color: rgb(226, 224, 224);
+				border: 1px solid rgb(110, 110, 110);
+				padding: 5px;
+				margin-right: 10px;
+			}
+		
+			.timeText {
+				text-align: right;
+				font-size: 0.9rem;
+				margin-bottom: 2px;
+			}
+		
+			.mailText {
+				font-size: 0.9rem;
+				margin-top: 2px;
+			}
+		
+			.nameText {
+				font-size: 1.5rem;
+			}
+		
+			a:hover { 
+				color: red;
+			}
+		
+			a {
+				color: #676d74;
+			}
+		
+			input {
+				border: 1px solid rgb(110, 110, 110) !important;
+				border-style: solid !important;
+				overflow: auto;
+				height: 30px;
+				width: 100%;
+				margin-right: 8px;
+				padding: 4px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="app">
+			<div class="mainLayout">
+				<div class="appLayout">
+					<div class="searchRowLayout">
+						<span class="searchRowItem">ПОИСК: </span>
+						<span class="searchRowItem"><input type="text" v-model="searchText"/></span>
+					</div>
+					<div class="commitsLayout">
+						<div v-for="(item, index) in visibleCommits" :key="index" class="commit">
+							<div class="timeText">{{item.commit.author.date | dateFormat}}</div>
+							<div class="nameText">{{item.commit.author.name.toUpperCase()}}</div>
+							<div class="mailText">
+								<a :href="`mailto:${item.commit.author.email}`"	>
+									{{item.commit.author.email}}
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		var app = new Vue({
+			el: '#app',
+			computed: {
+				visibleCommits() {
+					let visible = []
+					if (this.searchText) {
+						this.commits.forEach(element => {
+							if (element.commit.author.name.toLowerCase().includes(this.searchText) || element.commit.author.email.toLowerCase().includes(this.searchText)) {
+								visible.push(element)
+							}
+						});
+					} else {
+						visible = this.commits
+					}
+					return visible
+				}
+			},
+
+			filters: {
+				dateFormat: function(value) {
+					let date = new Date(value)
+					return `${date.getFullYear()}-${('0'+date.getMonth()).slice(-2)}-${('0'+date.getDate()).slice(-2)} 
+					${('0'+date.getHours()).slice(-2)}:${('0'+date.getMinutes()).slice(-2)}:${('0'+date.getSeconds()).slice(-2)}`
+				}
+			}, 
+
+			data: () => ({
+				searchText: '',
+				commits: null,
+			}),
+
+			async mounted() {
+				this.commits = await fetch('https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits')
+					.then(response => response.json())
+			}
+		})
+	</script>
+</html>

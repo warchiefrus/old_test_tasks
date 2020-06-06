@@ -96,6 +96,5 @@
 	}
 
 	echo json_encode($respose);
-
 ?>	
 

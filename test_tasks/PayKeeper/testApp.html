@@ -1,0 +1,224 @@
+<html lang=ru>
+  <head>
+		<meta charset=utf-8>
+		<meta http-equiv=X-UA-Compatible content="IE=edge">
+		<meta name=viewport content="width=device-width,initial-scale=1">
+		<title>Тестовое задание PayKeeper</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style>
+			body {
+				background: #20262E;
+				padding: 20px;
+				font-family: Helvetica;
+			}
+
+			#app {
+				background: #fff;
+				border-radius: 4px;
+				padding: 20px;
+				transition: all 0.2s;
+			}
+
+			ol {
+				list-style-type: none;
+				padding: 0px;
+			}
+
+			li {
+				margin: 8px 0;
+				width: 250px;
+				border-bottom: solid 1px #ccc;
+				margin-bottom: 20px;
+			}
+
+			label.islong span::before {
+				content: "⌛";
+			}
+
+			div.loaded ol.tasks li span {
+				opacity: 1;
+				transition: all 0.5s ease-out
+			}
+
+			div.loaded ol.tasks input:checked + span {
+				opacity: 0.5;
+				color: #626262;
+			}
+
+			h2 {
+				font-weight: bold;
+				margin-bottom: 15px;
+			}
+
+			@media screen and (min-width: 580px) { 
+				li {
+					display: inline;
+					margin-right: 10px;
+				}
+			}
+
+			input {
+				color: #00244a;
+				border: 1px solid #bdbdbd;
+			}
+
+			.inputText {
+				padding: 8px 7px;
+			}
+
+			.inputValid {
+				border: 1px solid #54c247;
+			}
+
+			.inputInvalid {
+				border: 1px solid #e60d2e;
+			}
+
+			.inputText:focus {
+				outline: none;
+			}
+
+			.delTaskDisabled {
+				color: #bdbdbd;
+				cursor: not-allowed;
+			}
+
+			.delTaskEnabled {
+				color: #e60d2e;
+				cursor: pointer;
+			}		
+
+			button {
+				background: linear-gradient(#f58e21, #f7a330);
+				color: #ffffff;
+				padding: 11px 24px;
+				border-radius: 4px;
+				border: none;
+				box-shadow: 0 1px 1px rgba(0,0,0,0.5);
+			}	
+
+			button:hover {
+				background: linear-gradient(#f1710c, #f4871b);
+			}
+				
+			button:disabled {
+				background: linear-gradient(#cacaca, #d6d6d6);
+			}	
+		</style>
+	</head>
+
+	<body>
+		<div id="app" :class={loaded:data_is_loaded}>
+			<h2>Todo:</h2>
+			<ol class='tasks'  >
+				<task-element v-for='(task, index) in todos' :key='index' 
+					:task='task' 
+					:index='index' 
+					:ticks="ticks"
+					:startdate="startdate"
+					@deletetask="deleteTask">
+				</task-element>
+			</ol>
+			<h3>
+				Add new task:
+			</h3>
+			<input type='text' v-model:value="inputText" 
+				class="inputText" :class="{'inputValid': inputValid&&inputText, 'inputInvalid':!inputValid&&inputText}"
+				placeholder="New task"
+				/>
+			<button @click="addTask" :disabled="!inputValid">
+				Add task
+			</button>
+		</div>
+	</body>
+
+	<script>
+		Vue.component('task-element',{
+			props : ['task', 'index', 'ticks', 'startdate'],
+
+			watch: { 
+				ticks() {
+					 this.tick()
+				}
+			},
+
+			mounted() {	this.tick()	},
+
+			data : function () {
+				var d = {seconds_elapsed: null}; 
+				return d;
+			},
+
+			methods: {
+				deleteTask() { this.$emit('deletetask', this.index) },
+
+				tick() {
+					let startDate = this.task.addedDate? this.task.addedDate : this.startdate
+					let curDate = new Date()
+					let diff = curDate - startDate
+					let hours = Math.trunc(diff/1000/(60*60))
+					let minutes = ('0' + Math.trunc(diff/1000/(60))).slice(-2) 
+					let seconds = ('0' + Math.trunc(diff/1000)).slice(-2) 
+					this.seconds_elapsed = `${hours}:${minutes}:${seconds}`
+				}			
+			},
+
+			template : `<li>
+					<label :class='{islong:task.islong}'>
+						<input type="checkbox"
+							v-model:checked="task.done">
+						<span>
+							{{ task.text }}
+						</span>
+						<small>
+							({{ seconds_elapsed }})
+						</small>
+						<small @click="deleteTask" :class="{'delTaskDisabled':!task.done, delTaskEnabled: task.done}">
+							X
+						</small>
+					</label>
+				</li>`,
+		});
+
+		new Vue({
+			el: "#app",
+
+			computed: {
+				inputValid() { 
+					return this.inputText.length >= 10 ? true:false 
+				}
+			},
+
+			data: {
+				todos: [
+					{ text: "Learn JavaScript", done: false, islong: true},
+					{ text: "Learn Vue", done: false, islong: false},
+					{ text: "Play around in JSFiddle", done: true, islong: false},
+					{ text: "Build something awesome", done: true, islong: true}
+				],
+				data_is_loaded: true,
+				inputText: '',
+				ticks: 0,
+				startdate: new Date()
+			},
+
+			methods: {
+				addTask() {
+					if (this.inputText.length >= 10) {
+						this.todos.push({text: this.inputText, done: false, isLong: false, addedDate: new Date()})
+					}
+				},
+
+				deleteTask(index) {
+					if (this.todos[index].done) {
+						this.todos.splice(index, 1)
+					}
+				},
+			},
+
+			mounted() {
+				setInterval(() => { this.ticks++ }, 1000);
+			}
+		})
+	</script>
+</html>

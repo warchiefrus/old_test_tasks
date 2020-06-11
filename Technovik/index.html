@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<meta charset=utf-8>
+		<meta http-equiv=X-UA-Compatible content="IE=edge">
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <script src="./js/jquery-3.4.1.min.js"></script>
+    <script type="module" src="./js/main.js"></script>
+    <title>Тестовое задание ООО ВЦ Техновик</title>
+    <link rel="stylesheet" type="text/css" href="./css/style.css">
+  </head>
+  <body>
+    <table id='phonesTable'>
+      <thead class='thead'>
+        <tr>
+          <th scope="col">Наименование</th>
+          <th scope="col">Телефон</th>
+          <th scope="col">
+            <button class="btn1">+</button>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="phonesTableBody">
+
+      </tbody>
+    </table>
+
+    <div id="modalForm" class="modal">
+      <div class="modalFormContent">
+        <div class="modalInputs">
+          <span class="inputLabel">Наименование</span>
+          <input type="text" id="nameInput" maxlength="45" class="formInput">
+    
+          <span class="inputLabel">Телефон</span>
+          <input type="text" id="phoneInput" maxlength="45" class="formInput">
+        </div>
+        <div class="formActions">
+          <button id="formSave" class="btn3">Записать</button>
+          <button id="formClose" class="btn3">Отмена</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalConfirm" class="modal">
+      <div class="modalFormContent">
+        <span>Вы подтвеждлаете удаление строки?</span>
+        <div class="formActions">
+          <button id="formConfirm" class="btn3">ДА</button>
+          <button id="formCancel" class="btn3">НЕТ</button>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

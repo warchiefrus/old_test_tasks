@@ -143,6 +143,7 @@ export default {
         color: #afafaf;
         resize: none;
         border: none;
+        margin-bottom: 10px;
       }
       .cardsColumn__actions {
         display: flex;

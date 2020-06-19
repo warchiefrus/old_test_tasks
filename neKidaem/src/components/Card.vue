@@ -4,7 +4,6 @@
     @dragleave.stop.prevent="dragleave"
     @dragover.stop.prevent
     @drop.stop.prevent="drop"
-    :style="opacity"
     class="card"
   >
     <div class="card__top" :style="cardTopHeight"></div>
@@ -13,6 +12,7 @@
       @dragstart="dragstart"
       class="card__body"
       @dragend="dragend"
+      :style="opacity"
     >
       <div class="card__close" @click="closeClick">&times;</div>
       <div><span class="id">id: </span>{{card.id}}</div>
@@ -38,7 +38,7 @@ export default {
     dragstart() {
       setTimeout(() => {
         this.opacity = 'opacity: 0;'  
-      }, 10)
+      }, 0)
       
       this.$store.commit('set_draggedCard', this.card)
     },
@@ -83,12 +83,6 @@ export default {
 
     }
   },
-
-  mounted() {
-    if (!this.card.id) {
-      this.opacity = 'opacity: 0.1;'
-    }
-  }
 }
 </script>
 

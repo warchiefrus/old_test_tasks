@@ -16,7 +16,7 @@ export default new Vuex.Store({
     },
 
     dragEnd(state) {
-      state.dragedItem = null
+      state.draggedCard = null
     },
 
     set_token(state, payload) {

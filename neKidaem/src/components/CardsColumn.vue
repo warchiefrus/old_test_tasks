@@ -12,28 +12,28 @@
         :card="card"
       />
 
-      <div 
+      <div id="dropArea"
         @dragenter.stop.prevent="dragenter"
         @dragover.prevent.stop
-      >
-        <div class="carddrop" :style="carddropHeight"
-          @dragleave.stop.prevent="dragleave"
-          @dragover.prevent.stop
-        ></div>
+        @dragleave.prevent="dragleave"
+      > 
+        <div :class="{noPointerEvents}">
+          <div class="carddrop" :style="carddropHeight"/>
 
-        <div v-if="addMode">
-          <textarea class="cardsColumn__input" v-model="cardText" placeholder="Введите заголовок для этой карточки" @keyup.enter="addCard">
-          </textarea>
-        </div>
+          <div v-if="addMode">
+            <textarea class="cardsColumn__input" v-model="cardText" placeholder="Введите заголовок для этой карточки" @keyup.enter="addCard">
+            </textarea>
+          </div>
 
-        <div v-if="addMode" class="cardsColumn__actions">
-          <button @click="addCard" class="cardsColumn__addButton">Добавить карточку</button>
-          <button @click="cancel" class="cardsColumn__delButton"><span class="icon">&times;</span></button>
-        </div>
-        <div v-else class="cardsColumn__actions">
-          <button @click="addMode = true" class="cardsColumn__plusButton">
-            <span class="icon">+</span><span class="cardsColumn__plusButton_text">Добавить карточку</span>
-          </button>
+          <div v-if="addMode" class="cardsColumn__actions">
+            <button @click="addCard" class="cardsColumn__addButton">Добавить карточку</button>
+            <button @click="cancel" class="cardsColumn__delButton"><span class="icon">&times;</span></button>
+          </div>
+          <div v-else class="cardsColumn__actions">
+            <button @click="addMode = true" class="cardsColumn__plusButton">
+              <span class="icon">+</span><span class="cardsColumn__plusButton_text">Добавить карточку</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -42,11 +42,13 @@
 
 <script>
 import Card from '@/components/Card.vue'
+import {mapState} from 'vuex'
 
 export default {
   props: ['headerColor', 'headerName', 'dataName', 'index'],
 
   computed: {
+    ...mapState(['draggedCard']),
     items() {
       return this.$store.state.cards.filter(item => {
         return this.index == item.row
@@ -62,6 +64,7 @@ export default {
     cardText: null,
     addMode: false,
     carddropHeight: 'height: 10px;',
+    noPointerEvents: false,
   }),
 
   methods: {
@@ -78,35 +81,36 @@ export default {
     },
 
     drop() {
-      let draggedCard = this.$store.state.draggedCard
-      if (draggedCard) {
+      if (this.draggedCard) {
         this.$store.dispatch('updateCard', 
-          {id: draggedCard.id, 
-            card: {row: this.index, seq_num: this.items.length, text: draggedCard.text}
+          {id: this.draggedCard.id, 
+            card: {row: this.index, seq_num: this.items.length, text: this.draggedCard.text}
           }
         )
         this.$store.commit('dragEnd')
-        setTimeout(() => {this.carddropHeight = 'height: 10px;'}, 0)
+        this.carddropHeight = 'height: 10px;'
       }
     },
 
     dragenter() {
-      let draggedCard = this.$store.state.draggedCard
-      if (this.items.indexOf(draggedCard) != -1) { 
-        if (this.items.indexOf(draggedCard) != (this.items.length - 1)) {
-          setTimeout(() => {this.carddropHeight = 'height: 120px;'}, 0)
+      if (this.items.indexOf(this.draggedCard) != -1) { 
+        if (this.items.indexOf(this.draggedCard) != (this.items.length - 1)) {
+          this.carddropHeight = 'height: 120px;'
         }
       } else {
-        setTimeout(() => {this.carddropHeight = 'height: 120px;'}, 0)
+        this.carddropHeight = 'height: 120px;'
       }
     },
 
     dragleave() {
-      setTimeout(() => {this.carddropHeight = 'height: 10px;'}, 0)
+      this.carddropHeight = 'height: 10px;'
     },    
   },
 
-  mounted() {
+  watch: {
+    draggedCard (val) {
+      this.noPointerEvents = val? true: false
+    }
   }
 }
 </script>
@@ -115,6 +119,9 @@ export default {
   .cardsColumn {
     width: 100%;
     min-width: 230px;
+    .noPointerEvents{
+      pointer-events: none;
+    }
     .carddrop {
       opacity: 0;
       border: none;

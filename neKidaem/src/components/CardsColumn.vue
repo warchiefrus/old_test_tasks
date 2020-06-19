@@ -142,7 +142,6 @@ export default {
       .cardsColumn__actions {
         display: flex;
         justify-content: flex-start;
-        margin-top: 10px;
         button {
           border: none;
           color: #afafaf;

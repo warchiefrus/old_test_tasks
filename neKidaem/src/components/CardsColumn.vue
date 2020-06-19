@@ -5,7 +5,7 @@
     </div>
 
     <div class="cardsColumn__body"
-  
+      @drop.prevent.stop="drop"
     >
 
       <Card v-for="card in items" :key="card.id"
@@ -15,11 +15,9 @@
       <div 
         @dragenter.stop.prevent="dragenter"
         @dragover.prevent.stop
-        
       >
         <div class="carddrop" :style="carddropHeight"
           @dragleave.stop.prevent="dragleave"
-          @drop.prevent.stop="drop"
           @dragover.prevent.stop
         ></div>
 

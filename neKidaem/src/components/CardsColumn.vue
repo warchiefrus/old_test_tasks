@@ -5,29 +5,39 @@
     </div>
 
     <div class="cardsColumn__body"
-     @drop.prevent.stop="drop"
-     @dragover.prevent.stop
+  
     >
 
       <Card v-for="card in items" :key="card.id"
         :card="card"
       />
 
-      <div v-if="addMode">
-        <textarea class="cardsColumn__input" v-model="cardText" placeholder="Введите заголовок для этой карточки" @keyup.enter="addCard">
-        </textarea>
-      </div>
+      <div 
+        @dragenter.stop.prevent="dragenter"
+        @dragover.prevent.stop
+        
+      >
+        <div class="carddrop" :style="carddropHeight"
+          @dragleave.stop.prevent="dragleave"
+          @drop.prevent.stop="drop"
+          @dragover.prevent.stop
+        ></div>
 
-      <div v-if="addMode" class="cardsColumn__actions">
-        <button @click="addCard" class="cardsColumn__addButton">Добавить карточку</button>
-        <button @click="cancel" class="cardsColumn__delButton"><span class="icon">&times;</span></button>
-      </div>
-      <div v-else class="cardsColumn__actions">
-        <button @click="addMode = true" class="cardsColumn__plusButton">
-          <span class="icon">+</span><span class="cardsColumn__plusButton_text">Добавить карточку</span>
-        </button>
-      </div>
+        <div v-if="addMode">
+          <textarea class="cardsColumn__input" v-model="cardText" placeholder="Введите заголовок для этой карточки" @keyup.enter="addCard">
+          </textarea>
+        </div>
 
+        <div v-if="addMode" class="cardsColumn__actions">
+          <button @click="addCard" class="cardsColumn__addButton">Добавить карточку</button>
+          <button @click="cancel" class="cardsColumn__delButton"><span class="icon">&times;</span></button>
+        </div>
+        <div v-else class="cardsColumn__actions">
+          <button @click="addMode = true" class="cardsColumn__plusButton">
+            <span class="icon">+</span><span class="cardsColumn__plusButton_text">Добавить карточку</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -53,7 +63,7 @@ export default {
   data: () => ({
     cardText: null,
     addMode: false,
-    
+    carddropHeight: 'height: 10px;',
   }),
 
   methods: {
@@ -78,8 +88,24 @@ export default {
           }
         )
         this.$store.commit('dragEnd')
+        setTimeout(() => {this.carddropHeight = 'height: 10px;'}, 0)
       }
     },
+
+    dragenter() {
+      let draggedCard = this.$store.state.draggedCard
+      if (this.items.indexOf(draggedCard) != -1) { 
+        if (this.items.indexOf(draggedCard) != (this.items.length - 1)) {
+          setTimeout(() => {this.carddropHeight = 'height: 120px;'}, 0)
+        }
+      } else {
+        setTimeout(() => {this.carddropHeight = 'height: 120px;'}, 0)
+      }
+    },
+
+    dragleave() {
+      setTimeout(() => {this.carddropHeight = 'height: 10px;'}, 0)
+    },    
   },
 
   mounted() {
@@ -91,6 +117,11 @@ export default {
   .cardsColumn {
     width: 100%;
     min-width: 230px;
+    .carddrop {
+      opacity: 0;
+      border: none;
+      transition: all 0.2s ease-in-out;
+    }
     .cardsColumn__header {
       padding: 12px 4%;
       text-align: left;
@@ -103,7 +134,6 @@ export default {
         width: 100%;
         height: 10vh;
         padding: 10px;
-        margin-top: 10px;
         background-color: #57575a;
         color: #afafaf;
         resize: none;

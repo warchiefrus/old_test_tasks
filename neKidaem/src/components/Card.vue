@@ -38,7 +38,7 @@ export default {
     dragstart() {
       setTimeout(() => {
         this.opacity = 'opacity: 0;'  
-      }, 0)
+      }, 10)
       
       this.$store.commit('set_draggedCard', this.card)
     },

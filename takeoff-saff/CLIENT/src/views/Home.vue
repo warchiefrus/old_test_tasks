@@ -73,7 +73,7 @@
       :dialog="editContactDialog"
       :contact="contactInDialog"
       @editSave="editSave"
-      @editCancel="editClose"
+      @editClose="editClose"
     /> 
   </v-card>
 </template>

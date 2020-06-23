@@ -1,0 +1,22 @@
+{
+  "contacts": [
+    {
+      "id": 1,
+      "name": "Львов Кондрат Даниилович",
+      "company": "Takeoff Saff",
+      "email": "test1@gmail.com"
+    },
+    {
+      "id": 2,
+      "name": "Маслов Аполлон Донатович",
+      "company": "Takeoff Saff",
+      "email": "test2@gmail.com"
+    },
+    {
+      "id": 3,
+      "name": "Мясникова Мария Казимировна",
+      "company": "Takeoff Saff",
+      "email": "test3@gmail.com"
+    }
+  ]
+}

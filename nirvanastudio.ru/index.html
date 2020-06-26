@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Расчёт</title>
+
+  <style>
+    main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 90vh;
+    }
+    .noErrorText {
+      display: none;
+    }
+    .errorText {
+      color: red;
+      display: block;
+    }
+    .errorInput {
+      border: 1px solid red;
+    }
+
+    input:focus {
+      outline: none;
+    }
+    
+    .inputField {
+      display: flex;
+      flex-direction: column;
+      width: 200px;
+      padding: 10px 10px 10px 10px;
+    }
+
+  </style>
+</head>
+<body>
+  <main>
+    <div class="inputField">
+      <span>Приход</span>
+      <input type="number" id="fuelResive" step=0.000001>
+      <small class="noErrorText" id="fuelResiveError">Ошибка</small>
+    </div>
+
+    <div class="inputField">
+      <span>Расход</span>
+      <input type="number" id="fuelSpend" step=0.000001>
+      <small class="noErrorText" id="fuelSpendError">Ошибка</small>
+    </div>
+
+    <div >
+      <span>Остаток:</span><b><span id="fuelRest"></span></b>
+    </div>
+  </main>
+</body>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){ 
+    document.querySelector("#fuelResive").addEventListener('input', inputAction)
+    document.querySelector("#fuelSpend").addEventListener('input', inputAction)
+  });
+
+  const inputAction = (e) => {
+    let value = e.target.value
+    if (checkValue(value)) {
+      if (e.target.classList.contains ('errorInput')) {
+        e.target.classList.remove('errorInput')
+        document.querySelector(`#${e.target.id}Error`).classList.remove('errorText')
+      }        
+      calculateSum()
+    } else {
+      if (!e.target.classList.contains ('errorInput')) {
+        e.target.classList.add('errorInput')
+        document.querySelector(`#${e.target.id}Error`).classList.add('errorText')
+        document.querySelector('#fuelRest').innerHTML = ''
+      }            
+    }
+  }
+
+  const checkValue = (value) => {
+    let result = false
+    if (value) {
+      if (value > Math.trunc(value)) {
+        let fraction = value.toString().split('.')[1]
+        if (fraction.length <= 6) {
+          result = true
+        }
+      } else {
+        result = true
+      }
+    } else {
+      result = true
+    }
+
+    if (result) {
+      if (value < 0 || value > 100000) {
+        result = false
+      }
+    }
+    return result
+  }
+
+  const calculateSum = () => {
+    let fuelResive = document.querySelector("#fuelResive")
+    let fuelSpend = document.querySelector("#fuelSpend")
+    if (!fuelResive.classList.contains ('errorInput')&&!fuelSpend.classList.contains ('errorInput')) {
+      let fuelRest = +(fuelResive.value - fuelSpend.value).toFixed(6)
+      fuelRest = fuelRest.toString().replace('.', ',')
+      document.querySelector("#fuelRest").innerHTML = fuelRest
+    }
+  }
+</script>
+
+</html>

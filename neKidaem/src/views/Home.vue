@@ -20,6 +20,7 @@ export default {
 
   data: () => ({
     columns: [],
+    
   }),
 
   async mounted() {

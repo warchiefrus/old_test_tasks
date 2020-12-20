@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link
+    type="text/css"
+    rel="stylesheet"
+    href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+  />
+  <link
+    type="text/css"
+    rel="stylesheet"
+    href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
+  />
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>  
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <title>Тестовое задание Social Links</title>
+</head>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  button {
+    margin: 2px 5px 2px 5px;
+  }
+
+  .accounts {
+    width: 100%;
+  }
+
+  .accountsHeader {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .headerItem {
+    height: 80px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .card {
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin: 10px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .cardItem {
+    margin: 10px;
+  }
+
+  .paginator {
+    display: flex;
+    justify-content: center;
+  }
+
+  .paginatorItem {
+    margin: 2px;
+  }
+
+  .modalDialog {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+
+  .modalContent {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 250px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .modalActions {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+  }  
+
+  .input {
+    width: 200px;
+    margin-top: 10px;
+  }
+
+  .accountDetails {
+    max-height: 300px;
+    overflow-y: scroll;
+    padding: 0 20px;
+  }
+
+  .detailItem {
+    margin-top: 5px;
+  }
+
+  .plus {
+    color: green;
+  }
+
+  .minus {
+    color: red;
+  }
+</style>
+
+<body>
+
+  <main id="app">
+    <section class="container">
+      <div class="accounts">
+        <header class="accountsHeader">
+          <div class="headerItem">
+            <h2>Список счетов</h2>
+          </div>
+          <div class="headerItem">
+            <button class="btn" @click="api_addAccount">Добавить</button>
+          </div>
+        </header>
+
+        <div class="accountsBody">
+          <account v-for="(account, index) of pageItems"
+           :account="account"
+           :usertoken="userToken"
+           @del_account="api_delAccount"
+           @add_money="add_money"
+           @spend_money="spend_money"
+          />
+        </div>
+
+        <paginator v-if="pages > 1" :pages="pages" @page_change="page_change"/>
+      </div>
+
+      <div v-show="dialog" class="modalDialog">
+        <div class="modalContent">
+          <header>
+            <h3 v-if="dialogType > 0">Пополнить</h3>
+            <h3 v-else>Потратить</h3>
+          </header>
+          <input type="number" class="input" v-model="dialogValue">
+          <input v-if="dialogType < 0" type="text" class="input" v-model="dialogText" placeholder="Назначание">
+          <div class="modalActions">
+            <button @click="dialogOk">ОК</button>
+            <button @click="dialogCancel">Отмена</button>
+          </div>
+        </div>
+      </div>
+
+
+    </section>
+  </main>
+
+  <script type="text/x-template" id="account-template">
+    <section>
+      <div class="card">
+        <a hfer="#" @click.prevent="expandAcc" class="btn  cardItem" :data-acc="account.id">
+          Счёт: {{account.id}} 
+        </a>
+        <div class="cardItem">Баланс: {{account.balance}}</div>
+        <button class="btn btn-success cardItem" @click="add_money">Пополнить</button>
+        <button class="btn btn-warning cardItem" @click="spend_money">Потратить</button>
+        <button class="btn btn-danger cardItem" @click="del_account">Удалить счёт</button>
+      </div>
+      <div v-if="showDetail" class="accountDetails">
+        <div v-if="detailData.length">
+          <accdetail v-for="(item, index) of detailData" :key="index" :item="item"/>
+        </div>
+        <div v-else>
+          пусто
+        </div>
+      </div>
+    </section>
+  </script>
+
+  <script type="text/x-template" id="paginator-template">
+    <div class="paginator">
+      <button v-for="index of pages" class="btn paginatorItem" @click="page_change" :value="index">{{index}}</button>
+    </div>
+  </script>  
+
+  <script type="text/x-template" id="accdetail-template">
+    <div class="detail">
+      <div class="detailItem" :class="{minus: item.merchant, plus: !item.merchant}">
+        {{ item.amount}}
+      </div>
+    </div>
+  </script>   
+
+  <script>
+
+    Vue.component('accdetail', {
+      props: ['item'],
+			data: () => ({
+			}),
+      template: '#accdetail-template'
+		})
+
+    Vue.component('account', {
+      props: ['account', 'usertoken'],
+			data: () => ({
+        showDetail: false,
+        detailData: []
+			}),
+      methods: {
+        add_money() {
+          this.showDetail = false
+          this.$emit('add_money', this.account)
+        },
+        spend_money() {
+          this.showDetail = false
+          this.$emit('spend_money', this.account)
+        },
+        del_account() {
+          this.showDetail = false
+          this.$emit('del_account', this.account)
+        },
+        async expandAcc(e) {
+          let accId = e.target.dataset.acc
+          if (this.showDetail) {
+            this.showDetail = false
+          } else {
+            let request = {  
+              method: 'GET',
+              headers: {
+                'Authorization': `Token ${this.usertoken}`
+              }
+            }     
+            let plus = await fetch(`http://localhost:8000/api/bank/action/`, request).then(response => response.json())
+            let minus = await fetch(`http://localhost:8000/api/bank/transaction/`, request).then(response => response.json())
+            
+            let all = [...plus, ...minus]
+            this.detailData = all.filter(item => {return item.account == accId})            
+            this.showDetail = true
+          }
+        },
+      },
+      template: '#account-template'
+		})
+
+
+    Vue.component('paginator', {
+      props: ['pages'],
+      data: () => ({
+        activePage: 0
+      }),
+      methods: {
+        page_change(e) {
+          this.activePage = e.target.value - 1
+          this.$emit('page_change', this.activePage)
+        }
+      },
+      template: '#paginator-template'
+		})   
+
+
+    var app = new Vue({
+			el: '#app',
+			computed: {
+        pages() {
+          let pages = this.accounts.length / this.maxOnPage
+          let additionalPage = Math.trunc(pages) !== pages ? 1 : 0
+          return Math.trunc(pages) + additionalPage 
+        },
+        pageItems() {
+          let items = []
+          this.accounts.forEach((item, index) => {
+            if (index >= this.curPage * this.maxOnPage && index < this.curPage * this.maxOnPage + this.maxOnPage) {
+              items.push(item)
+            }
+          });
+          return items
+        }
+			},
+
+			data: () => ({
+        userToken: 'eb93e1cfc1a8eefe241658106146d34bae6c245a',
+        route: 'accounts',
+        accounts: [],
+        curPage: 0,
+        maxOnPage: 10,
+        dialog: false,
+        dialogAcc: null,
+        dialogType: null,
+        dialogValue: null,
+        dialogText: null
+			}),
+
+      methods: {
+        async api_addAccount() {
+          let request = {  
+            method: 'POST',
+            headers: {'Authorization': `Token ${this.userToken}`}
+          }           
+          let newAccount = await fetch(`http://localhost:8000/api/bank/account/`, request).then(response => response.json())
+          this.accounts.push(newAccount)
+        },
+
+        async api_delAccount(acc) {
+          let request = {  
+            method: 'DELETE',
+            headers: {'Authorization': `Token ${this.userToken}`}
+          }     
+          await fetch(`http://localhost:8000/api/bank/account/${acc.id}/`, request)
+          this.accounts.splice(this.accounts.indexOf(acc), 1)
+          if (this.pageItems.length === 0 && this.curPage != 0) {
+            this.curPage--
+          }
+        },
+
+        async api_actionPost(acc, val) {
+          let request = {  
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Token ${this.userToken}`
+            },
+            body: JSON.stringify({account: acc.id, amount: val})
+          }     
+          await fetch(`http://localhost:8000/api/bank/action/`, request)
+          acc.balance = +acc.balance + +val
+        }, 
+
+        async api_transactionPost(acc, val, text) {
+          let request = {  
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Token ${this.userToken}`
+            },
+            body: JSON.stringify({account: acc.id, amount: val, merchant: text})
+          }     
+          let result = await fetch(`http://localhost:8000/api/bank/transaction/`, request)
+          if (!result.error) {
+            acc.balance = +acc.balance - val
+          }
+        },   
+
+        add_money(acc) {
+          this.dialogAcc = acc
+          this.dialogValue = 0
+          this.dialogType = 1
+          this.dialog = true
+        },
+
+        spend_money(acc) {
+          this.dialogAcc = acc
+          this.dialogValue = 0
+          this.dialogType = -1
+          this.dialogText = ''
+          this.dialog = true
+        },
+
+        dialogOk() {
+          if (this.dialogType > 0) {
+            if (this.dialogValue > 0) {
+              this.api_actionPost(this.dialogAcc, this.dialogValue)
+              this.dialog = false
+            }
+          } else {
+            if (this.dialogValue > 0 && this.dialogText != '') {
+              this.api_transactionPost(this.dialogAcc, this.dialogValue, this.dialogText)
+              this.dialog = false
+            }            
+          }
+        },
+
+        dialogCancel() {
+          this.dialog = false
+        },
+
+        page_change(index) {
+          this.curPage = index
+        },
+      },
+
+      async mounted() {
+        let request = {  
+          method: 'GET',
+          headers: {'Authorization': `Token ${this.userToken}`}
+        }        
+        this.accounts = await fetch(`http://localhost:8000/api/bank/account/`, request).then(response => response.json())
+      }
+		})
+  </script>
+  
+</body>
+</html>

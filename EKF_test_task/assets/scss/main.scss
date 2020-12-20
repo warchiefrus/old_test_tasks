@@ -1,0 +1,60 @@
+.main {
+  padding: 0 10px;
+}
+
+.table {
+  width: 100%;
+  border: 1px solid #EEEEEE;
+}
+
+.tr {
+  display: grid;
+  grid-template-columns: 56px 3fr 1fr 1fr 0.5fr;
+  column-gap: 1px;
+}
+
+.th {
+  padding: 3px;
+  text-align: center;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow:  ellipsis;
+  white-space: nowrap;
+  border-bottom: 1px solid #2a2a2e;
+  background-color: #EEEEEE;
+}
+
+.td {
+  text-align: left;
+  color:black;
+  padding: 3px;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.td__center {
+  text-align: center;
+}
+
+.td__right {
+  text-align: right;
+}  
+
+html {
+  font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  word-spacing: 1px;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: border-box;
+  margin: 0;
+}
